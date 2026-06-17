@@ -1,5 +1,6 @@
 import os
 import json
+from urllib.parse import quote
 import base64
 import tempfile
 import wave
@@ -142,12 +143,12 @@ async def make_call(request: Request):
 
 @app.api_route("/voice-connect", methods=["GET", "POST"])
 async def voice_connect(request: Request):
-    agent_name = request.query_params.get("agent" , "Priya")
+    agent_name = request.query_params.get("agent", "Priya")
     phone = request.query_params.get("phone", "")
+    phone_encoded = quote(phone)
     response = VoiceResponse()
-    response.say("Hello , this is the test")
     connect = Connect()
-    connect.stream(url=f"wss://voice-agent-production-5579.up.railway.app/media-stream?agent={agent_name}&phone={phone}")
+    connect.stream(url=f"wss://voice-agent-production-5579.up.railway.app/media-stream?agent={agent_name}&phone={phone_encoded}")
     response.append(connect)
     return HTMLResponse(content=str(response), media_type="application/xml")
 @app.websocket("/media-stream")
