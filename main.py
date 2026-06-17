@@ -143,7 +143,7 @@ async def make_call(request: Request):
 @app.api_route("/voice-connect", methods=["GET", "POST"])
 async def voice_connect(request: Request):
     agent_name = request.query_params.get("agent" , "Priya")
-    phone = request.query_paramas.get("phone" , "")
+    phone = request.query_params.get("phone", "")
     response = VoiceResponse()
     response.say("Hello , this is the test")
     connect = Connect()
