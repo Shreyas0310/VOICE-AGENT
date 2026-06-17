@@ -58,8 +58,11 @@ def speech_to_text(audio_data: bytes) -> str:
     try:
         import audioop
         pcm_data = audioop.ulaw2lin(audio_data, 2)
+        print(f"DEBUG: pcm_data type = {type(pcm_data)}, len = {len(pcm_data) if hasattr(pcm_data, '__len__') else 'N/A'}")
         if isinstance(pcm_data, tuple):
+            print(f"DEBUG: tuple contents types = {[type(x) for x in pcm_data]}")
             pcm_data = pcm_data[0]
+            print(f"DEBUG: after unpack type = {type(pcm_data)}")
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
             with wave.open(f.name, 'wb') as wav_file:
                 wav_file.setnchannels(1)
