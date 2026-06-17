@@ -140,16 +140,16 @@ async def make_call(request: Request):
     )
     return {"call_sid": call.sid, "agent": agent_name, "status": "calling"}
 
-@app.api_route("/voice-connect", methods=["GET", "POST"])
+@app.api("/voice-connect", methods=["GET" , "POST"])
 async def voice_connect(request: Request):
-    agent_name = request.query_params.get("agent", "Priya")
-    phone = request.query_params.get("phone", "")
+    agent_name = request.query_params.get("agent" , "Priya")
+    phone = request.query_paramas.get("phone" , "")
     response = VoiceResponse()
+    response.say("Hello , this is the test")
     connect = Connect()
     connect.stream(url=f"wss://voice-agent-production-5579.up.railway.app/media-stream?agent={agent_name}&phone={phone}")
     response.append(connect)
     return HTMLResponse(content=str(response), media_type="application/xml")
-
 @app.websocket("/media-stream")
 async def media_stream(websocket: WebSocket):
     await websocket.accept()
