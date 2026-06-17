@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+twilio
+groq
+elevenlabs
+python-dotenv
+pydub

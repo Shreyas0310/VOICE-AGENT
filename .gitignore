@@ -1,0 +1,5 @@
+venv/
+lancedb_store/
+*.json
+__pycache__/
+.env
