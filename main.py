@@ -112,6 +112,14 @@ def text_to_speech(text: str, voice_id: str) -> bytes:
     )
     return b"".join(audio_generator)
 
+@app.get("/test-ws")
+async def test_ws():
+    return {"status":"websocket route file is loaded"}
+
+
+
+
+
 @app.get("/")
 async def root():
     return {"status": "Voice Agent Running!"}
@@ -120,6 +128,7 @@ async def root():
 async def make_call(request: Request):
     data = await request.json()
     customer_phone = data.get("phone")
+
     agent_name = data.get("agent", "Priya")
 
     call = twilio_client.calls.create(
@@ -150,7 +159,6 @@ async def media_stream(websocket: WebSocket):
     call_sid = None
     stream_sid = None
     audio_buffer = bytearray()
-
     # Previous history load karo
     previous_history = load_previous_transcript(phone)
     if previous_history:
