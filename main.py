@@ -178,7 +178,7 @@ async def media_stream(websocket: WebSocket):
 
 
                 greeting = text_to_speech(f"Hello! I am {agent_name}, your customer care agent. How can I help you today?", agent_config["voice_id"])
-                greeting_b64 = base64.b64encode(greeting).decodee()
+                greeting_b64 = base64.b64encode(greeting).decode()
                 await websocket.send_text(json.dumps({
                     "event": "media",
         "streamSid": stream_sid,
