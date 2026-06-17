@@ -140,7 +140,7 @@ async def make_call(request: Request):
     )
     return {"call_sid": call.sid, "agent": agent_name, "status": "calling"}
 
-@app.api("/voice-connect", methods=["GET" , "POST"])
+@app.api_route("/voice-connect", methods=["GET", "POST"])
 async def voice_connect(request: Request):
     agent_name = request.query_params.get("agent" , "Priya")
     phone = request.query_paramas.get("phone" , "")
