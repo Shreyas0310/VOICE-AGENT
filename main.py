@@ -137,7 +137,7 @@ async def voice_connect(request: Request):
     phone = request.query_params.get("phone", "")
     response = VoiceResponse()
     connect = Connect()
-    connect.stream(url=f"wss://voice-agent-production-5579.up.railway.app?agent={agent_name}&phone={phone}")
+    connect.stream(url=f"wss://voice-agent-production-5579.up.railway.app/media-stream?agent={agent_name}&phone={phone}")
     response.append(connect)
     return HTMLResponse(content=str(response), media_type="application/xml")
 
