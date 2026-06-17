@@ -5,3 +5,4 @@ groq
 elevenlabs
 python-dotenv
 pydub
+websockets 
