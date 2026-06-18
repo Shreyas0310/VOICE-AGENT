@@ -204,19 +204,6 @@ async def media_stream(websocket: WebSocket):
                         user_text = speech_to_text(audio_data)
                         if user_text.strip():
                             print(f"👤 Customer: {user_text}")
-
-                            ai_response = get_ai_response(call_sid, user_text, agent_name, previous_history)
-                            print(f"🤖 {agent_name}: {ai_response}")
-
-                            audio_response = text_to_speech(ai_response, agent_config["voice_id"])
-                            audio_b64 = base64.b64encode(audio_response).decode()
-
-                            await websocket.send_text(json.dumps({
-                                "event": "media",
-                                "streamSid": stream_sid,
-                                "media": {"payload": audio_b64}
-                            }))
-                            print(f"✅ Audio sent!")
                     except Exception as e:
                         print(f"❌ Error: {e}")
 
