@@ -196,8 +196,9 @@ async def media_stream(websocket: WebSocket):
                 audio_buffer.extend(chunk)
 
                 if len(audio_buffer) > 16000:
-                    audio_data = bytes(audio_buffer),
+                    audio_data = bytes(audio_buffer)
                     audio_buffer.clear()
+                    print(f"DEBUG: calling speech_to_text with {len(audio_data)} bytes")
 
                     try:
                         user_text = speech_to_text(audio_data)
