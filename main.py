@@ -165,6 +165,7 @@ async def media_stream(websocket: WebSocket):
     call_sid = None
     stream_sid = None
     audio_buffer = bytearray()
+    last_user_text = ""
     # Previous history load karo
     previous_history = load_previous_transcript(phone)
     if previous_history:
@@ -195,15 +196,28 @@ async def media_stream(websocket: WebSocket):
                 chunk = base64.b64decode(data["media"]["payload"])
                 audio_buffer.extend(chunk)
 
-                if len(audio_buffer) > 16000:
+                if len(audio_buffer) > 64000:
                     audio_data = bytes(audio_buffer)
                     audio_buffer.clear()
                     print(f"DEBUG: calling speech_to_text with {len(audio_data)} bytes")
 
                     try:
                         user_text = speech_to_text(audio_data)
+                      
                         if user_text.strip():
                             print(f"👤 Customer: {user_text}")
+                            ai_response = get_ai_response(call_sid, user_text, agent_name, previous_history)
+                            print(f"🤖 {agent_name}: {ai_response}")
+                            audio_response = text_to_speech(ai_response, agent_config["voice_id"])
+                            audio_b64 = base64.b64encode(audio_response).decode()
+
+                            await websocket.send_text(json.dumps({
+                            "event": "media",
+                            "streamSid": stream_sid,
+                            "media": {"payload": audio_b64}
+                            }))
+                            print(f"✅ Audio sent!")
+
                     except Exception as e:
                         print(f"❌ Error: {e}")
 
