@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from groq import Groq
 from elevenlabs.client import ElevenLabs
 from elevenlabs import VoiceSettings
+from knowldege import create_user_kb
 load_dotenv()
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
@@ -32,6 +33,8 @@ AGENTS = {
 }
 
 conversation_history = {}
+kb = create_user_kb("demo_user", "company_new.pdf")
+print("✅ Company PDF loaded")
 
 
 
@@ -86,14 +89,16 @@ def get_ai_response(call_sid: str, user_text: str, agent_name: str, previous_his
         conversation_history[call_sid] = []
 
     system_prompt = agent_config["persona"]
-
-    # Previous call history context add karo
+    
     if previous_history:
-        prev_summary = "\n".join([f"{m['role']}: {m['content']}" for m in previous_history[-6:]])
+        prev_summary = "\n".join(
+            [f"{m['role']}: {m['content']}" for m in previous_history[-6:]]
+        )
         system_prompt += f"\n\nPrevious call history with this customer:\n{prev_summary}"
 
-    conversation_history[call_sid].append({"role": "user", "content": user_text})
-    
+    conversation_history[call_sid].append(
+        {"role": "user", "content": user_text}
+    )
 
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -105,7 +110,11 @@ def get_ai_response(call_sid: str, user_text: str, agent_name: str, previous_his
     )
 
     ai_text = response.choices[0].message.content
-    conversation_history[call_sid].append({"role": "assistant", "content": ai_text})
+
+    conversation_history[call_sid].append(
+        {"role": "assistant", "content": ai_text}
+    )
+
     return ai_text
 
 def text_to_speech(text: str, voice_id: str) -> bytes:
@@ -204,6 +213,7 @@ async def media_stream(websocket: WebSocket):
                     try:
                         user_text = speech_to_text(audio_data)
                       
+                    
                         if user_text.strip():
                             print(f"👤 Customer: {user_text}")
                             ai_response = get_ai_response(call_sid, user_text, agent_name, previous_history)
