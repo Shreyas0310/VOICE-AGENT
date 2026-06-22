@@ -13,6 +13,8 @@ from groq import Groq
 from elevenlabs.client import ElevenLabs
 from elevenlabs import VoiceSettings
 from knowldege import create_user_kb
+import edge_tts
+import tempfile
 load_dotenv()
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
@@ -55,6 +57,7 @@ def save_transcript(call_sid: str, phone: str = None):
         if phone:
             with open(f"history_{phone}.json", "w") as f:
                 json.dump(conversation_history[call_sid], f, indent=2)
+
         print(f"✅ Transcript saved!")
 
 def speech_to_text(audio_data: bytes) -> str:
@@ -100,12 +103,32 @@ def get_ai_response(call_sid: str, user_text: str, agent_name: str, previous_his
         {"role": "user", "content": user_text}
     )
 
+    docs = kb.search(user_text)
+    print("🔍 User asked:", user_text)
+    print("🔍 Docs found:", len(docs))  
+    context = ""
+    if docs:
+     context = docs[0].content
+    print(f"📚 KB Context: {context}")
+
+
+
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {"role": "system", "content": system_prompt},
-            *conversation_history[call_sid]
-        ],
+    {
+        "role": "system",
+        "content": f"""
+{system_prompt}
+
+Company Knowledge:
+{context}
+
+Use the company knowledge when answering company-related questions.
+"""
+    },
+    *conversation_history[call_sid]
+],
         max_tokens=150
     )
 
@@ -113,19 +136,13 @@ def get_ai_response(call_sid: str, user_text: str, agent_name: str, previous_his
 
     conversation_history[call_sid].append(
         {"role": "assistant", "content": ai_text}
+        
     )
 
     return ai_text
 
 def text_to_speech(text: str, voice_id: str) -> bytes:
-    audio_generator = eleven_client.text_to_speech.convert(
-        voice_id=voice_id,
-        text=text,
-        model_id="eleven_turbo_v2_5",
-        output_format="ulaw_8000",
-        voice_settings=VoiceSettings(stability=0.5, similarity_boost=0.75)
-    )
-    return b"".join(audio_generator)
+    return b""
 
 @app.get("/test-ws")
 async def test_ws():
@@ -227,6 +244,9 @@ async def media_stream(websocket: WebSocket):
                             "media": {"payload": audio_b64}
                             }))
                             print(f"✅ Audio sent!")
+                            
+
+                            
 
                     except Exception as e:
                         print(f"❌ Error: {e}")
@@ -243,3 +263,4 @@ async def media_stream(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), ws="auto")
+
