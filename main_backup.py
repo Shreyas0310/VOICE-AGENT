@@ -15,7 +15,7 @@ from elevenlabs import VoiceSettings
 from knowldege import create_user_kb
 import edge_tts
 import tempfile
-import asyncio
+
 load_dotenv()
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
@@ -145,19 +145,8 @@ Use the company knowledge when answering company-related questions.
 
     return ai_text
 
-async def text_to_speech(text: str) -> bytes:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
-        filename = f.name
-
-    communicate = edge_tts.Communicate(
-        text,
-        voice="en-US-AriaNeural"
-    )
-
-    await communicate.save(filename)
-
-    with open(filename, "rb") as audio_file:
-        return audio_file.read()
+def text_to_speech(text: str, voice_id: str) -> bytes:
+    return b""
 
 @app.get("/test-ws")
 async def test_ws():
@@ -276,10 +265,3 @@ async def media_stream(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), ws="auto")
-
-    
-    
-
-    
-        
-
