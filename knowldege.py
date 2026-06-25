@@ -12,7 +12,8 @@ def create_user_kb(user_id: str, pdf_path: str):
     uri="./lancedb_store",
     embedder=SentenceTransformerEmbedder(
         id="all-MiniLM-L6-v2"
-    )
+
+        )
 )
     kb = Knowledge(
         vector_db=vector_db,
@@ -20,6 +21,8 @@ def create_user_kb(user_id: str, pdf_path: str):
      
 
     kb.insert(path=pdf_path)
+
+
     
     return kb
 
@@ -30,3 +33,5 @@ if __name__ == "__main__":
 
     results = kb.search("What are the work hours?")
     print(results)
+
+    

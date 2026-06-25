@@ -16,6 +16,7 @@ from knowldege import create_user_kb
 import edge_tts
 import tempfile
 import asyncio
+from memory import load_customer_history, save_customer_history
 load_dotenv()
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
@@ -205,12 +206,13 @@ async def media_stream(websocket: WebSocket):
     audio_buffer = bytearray()
     last_user_text = ""
     # Previous history load karo
-    previous_history = load_previous_transcript(phone)
+    previous_history = load_customer_history(phone)
+
     if previous_history:
-        print(f"📖 Previous history loaded for {phone}")
-      
+        print(f"📖 Previous history loaded for {phone}")      
 
     print(f"📞 Call connected - Agent: {agent_name}")
+
 
     try:
         async for message in websocket.iter_text():
@@ -222,7 +224,9 @@ async def media_stream(websocket: WebSocket):
                 print(f"📞 Call SID: {call_sid}")
 
 
-                greeting = text_to_speech(f"Hello! I am {agent_name}, your customer care agent. How can I help you today?", agent_config["voice_id"])
+                greeting = await text_to_speech(
+    f"Hello! I am {agent_name}, your customer care agent. How can I help you today?"
+)
                 greeting_b64 = base64.b64encode(greeting).decode()
                 await websocket.send_text(json.dumps({
                     "event": "media",
@@ -248,7 +252,7 @@ async def media_stream(websocket: WebSocket):
                             print(f"👤 Customer: {user_text}")
                             ai_response = get_ai_response(call_sid, user_text, agent_name, previous_history)
                             print(f"🤖 {agent_name}: {ai_response}")
-                            audio_response = text_to_speech(ai_response, agent_config["voice_id"])
+                            audio_response = await text_to_speech(ai_response)
                             audio_b64 = base64.b64encode(audio_response).decode()
 
                             await websocket.send_text(json.dumps({
@@ -272,14 +276,12 @@ async def media_stream(websocket: WebSocket):
 
     except Exception as e:
         print(f"❌ WebSocket error: {e}")
+        
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), ws="auto")
 
-    
-    
 
-    
-        
+
 
