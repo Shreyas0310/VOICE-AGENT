@@ -140,7 +140,6 @@ Use the company knowledge when answering company-related questions.
         {"role": "assistant", "content": ai_text}
         
         
-
         
     )
 
@@ -217,12 +216,12 @@ async def media_stream(websocket: WebSocket):
     try:
         async for message in websocket.iter_text():
             data = json.loads(message)
+            print("EVENT:", data["event"])
 
             if data["event"] == "start":
                 call_sid = data["start"]["callSid"]
                 stream_sid = data["start"]["streamSid"]
                 print(f"📞 Call SID: {call_sid}")
-
 
                 greeting = await text_to_speech(
     f"Hello! I am {agent_name}, your customer care agent. How can I help you today?"
@@ -262,9 +261,6 @@ async def media_stream(websocket: WebSocket):
                             }))
                             print(f"✅ Audio sent!")
                             
-
-                            
-
                     except Exception as e:
                         print(f"❌ Error: {e}")
 
