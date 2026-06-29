@@ -18,7 +18,7 @@ def create_user_kb(user_id: str, pdf_path: str):
     kb = Knowledge(
         vector_db=vector_db,
     )
-     
+
 
     kb.insert(path=pdf_path)
 
@@ -33,5 +33,3 @@ if __name__ == "__main__":
 
     results = kb.search("What are the work hours?")
     print(results)
-
-    
