@@ -16,8 +16,9 @@ from knowldege import create_user_kb
 import edge_tts
 import tempfile
 import asyncio
-from memory import load_customer_history, save_customer_history
-load_dotenv()
+from memory import load_customer_history
+from memory import save_customer_history
+load_dotenv() 
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
@@ -82,6 +83,8 @@ def speech_to_text(audio_data: bytes) -> str:
                     file=("audio.wav", audio_file, "audio/wav"),
                     model="whisper-large-v3",
                 )
+
+            
         return transcription.text
     except Exception as e:
         print(f"STT Error: {e}")
@@ -92,6 +95,13 @@ def get_ai_response(call_sid: str, user_text: str, agent_name: str, previous_his
 
     if call_sid not in conversation_history:
         conversation_history[call_sid] = []
+        if call_sid in conversation_history:
+            save_customer_history(
+                phone,
+                conversation_history[call_sid]
+            )
+            print("Customer memeory saved!")
+
 
     system_prompt = agent_config["persona"]
     
@@ -233,7 +243,6 @@ async def media_stream(websocket: WebSocket):
         "media": {"payload": greeting_b64}
                 }))
                 print(f"✅ Greeting sent!")
-
             elif data["event"] == "media" and stream_sid:
                 chunk = base64.b64decode(data["media"]["payload"])
                 audio_buffer.extend(chunk)
@@ -272,11 +281,19 @@ async def media_stream(websocket: WebSocket):
 
     except Exception as e:
         print(f"❌ WebSocket error: {e}")
+
+
+    except Exception as e:
+        print(f"thi")
         
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), ws="auto")
+
+    if __name__ == "__main__":
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=int(os.environmnt.get("PORT, 8000")))
 
 
 

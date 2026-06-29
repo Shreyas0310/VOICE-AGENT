@@ -19,10 +19,7 @@ def create_user_kb(user_id: str, pdf_path: str):
         vector_db=vector_db,
     )
 
-
     kb.insert(path=pdf_path)
-
-
     
     return kb
 
